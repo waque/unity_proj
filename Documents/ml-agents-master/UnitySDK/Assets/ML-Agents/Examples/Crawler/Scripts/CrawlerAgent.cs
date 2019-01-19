@@ -204,17 +204,17 @@ public class CrawlerAgent : Agent
             bpDict[leg3Lower].SetJointStrength(vectorAction[++i]);
         }
 
-        if (//(body.position.y - ground.position.y) < -50f ||
+        /*if ((body.position.y - ground.position.y) < -50f ||
             Mathf.Abs(body.position.x - ground.position.x) > 40f ||
             Mathf.Abs(body.position.z - ground.position.z) > 40f)
         {
             Done();
-            SetReward(-1f);
+            SetReward(-1f); 
         }
         else
         {
             SetReward(0.1f);
-        }
+        }*/
 
         if (rewardUseTimePenalty)
         {

@@ -203,15 +203,16 @@ public class CrawlerAgent : Agent
             bpDict[leg3Lower].SetJointStrength(vectorAction[++i]);
         }
 
-        // Set reward for this step according to mixture of the following elements.
-        if (rewardMovingTowardsTarget)
+        if ((body.position.y - ground.position.y) < -50f ||
+            Mathf.Abs(body.position.x - ground.position.x) > 40f ||
+            Mathf.Abs(body.position.z - ground.position.z) > 40f)
         {
-            RewardFunctionMovingTowards();
+            Done();
+            SetReward(-1f);
         }
-
-        if (rewardFacingTarget)
+        else
         {
-            RewardFunctionFacingTarget();
+            SetReward(0.1f);
         }
 
         if (rewardUseTimePenalty)
@@ -253,6 +254,7 @@ public class CrawlerAgent : Agent
     /// </summary>
     public override void AgentReset()
     {
+        Debug.Log("cona");
         if (dirToTarget != Vector3.zero)
         {
             transform.rotation = Quaternion.LookRotation(dirToTarget);
@@ -265,5 +267,6 @@ public class CrawlerAgent : Agent
 
         isNewDecisionStep = true;
         currentDecisionStep = 1;
+        //ground.rotation = new Quaternion(0f, 0f, 0f, 0f);
     }
 }

@@ -6,13 +6,13 @@ using MLAgents;
 [RequireComponent(typeof(JointDriveController))] // Required to set joint forces
 public class CrawlerAgent : Agent
 {
-    [Header("Target To Walk Towards")] [Space(10)]
-    public Transform target;
+    //[Header("Target To Walk Towards")] [Space(10)]
+    //public Transform target;
 
     public Transform ground;
-    public bool detectTargets;
-    public bool respawnTargetWhenTouched;
-    public float targetSpawnRadius;
+    //public bool detectTargets;
+    //public bool respawnTargetWhenTouched;
+    //public float targetSpawnRadius;
 
     [Header("Body Parts")] [Space(10)] public Transform body;
     public Transform leg0Upper;
@@ -25,14 +25,14 @@ public class CrawlerAgent : Agent
     public Transform leg3Lower;
 
     [Header("Joint Settings")] [Space(10)] JointDriveController jdController;
-    Vector3 dirToTarget;
+    //Vector3 dirToTarget;
     float movingTowardsDot;
     float facingDot;
 
     [Header("Reward Functions To Use")] [Space(10)]
-    public bool rewardMovingTowardsTarget; // Agent should move towards target
+    //public bool rewardMovingTowardsTarget; // Agent should move towards target
 
-    public bool rewardFacingTarget; // Agent should face the target
+    //public bool rewardFacingTarget; // Agent should face the target
     public bool rewardUseTimePenalty; // Hurry up
 
     [Header("Foot Grounded Visualization")] [Space(10)]
@@ -107,7 +107,7 @@ public class CrawlerAgent : Agent
     {
         jdController.GetCurrentJointForces();
         // Normalize dir vector to help generalize
-        AddVectorObs(dirToTarget.normalized);
+        //AddVectorObs(dirToTarget.normalized);
 
         // Forward & up to help with orientation
         AddVectorObs(body.transform.position.y);
@@ -118,7 +118,7 @@ public class CrawlerAgent : Agent
             CollectObservationBodyPart(bodyPart);
         }
     }
-
+    /*
     /// <summary>
     /// Agent touched the target
     /// </summary>
@@ -140,10 +140,10 @@ public class CrawlerAgent : Agent
         newTargetPos.y = 5;
         target.position = newTargetPos + ground.position;
     }
-
+    */
     public override void AgentAction(float[] vectorAction, string textAction)
     {
-        if (detectTargets)
+        /*if (detectTargets)
         {
             foreach (var bodyPart in jdController.bodyPartsDict.Values)
             {
@@ -152,10 +152,10 @@ public class CrawlerAgent : Agent
                     TouchedTarget();
                 }
             }
-        }
+        }*/
 
         // Update pos to target
-        dirToTarget = target.position - jdController.bodyPartsDict[body].rb.position;
+        //dirToTarget = target.position - jdController.bodyPartsDict[body].rb.position;
 
         // If enabled the feet will light up green when the foot is grounded.
         // This is just a visualization and isn't necessary for function
@@ -182,6 +182,7 @@ public class CrawlerAgent : Agent
             var bpDict = jdController.bodyPartsDict;
 
             int i = -1;
+            /*
             // Pick a new target joint rotation
             bpDict[leg0Upper].SetJointTargetRotation(vectorAction[++i], vectorAction[++i], 0);
             bpDict[leg1Upper].SetJointTargetRotation(vectorAction[++i], vectorAction[++i], 0);
@@ -191,7 +192,7 @@ public class CrawlerAgent : Agent
             bpDict[leg1Lower].SetJointTargetRotation(vectorAction[++i], 0, 0);
             bpDict[leg2Lower].SetJointTargetRotation(vectorAction[++i], 0, 0);
             bpDict[leg3Lower].SetJointTargetRotation(vectorAction[++i], 0, 0);
-
+            */
             // Update joint strength
             bpDict[leg0Upper].SetJointStrength(vectorAction[++i]);
             bpDict[leg1Upper].SetJointStrength(vectorAction[++i]);
@@ -203,7 +204,7 @@ public class CrawlerAgent : Agent
             bpDict[leg3Lower].SetJointStrength(vectorAction[++i]);
         }
 
-        if ((body.position.y - ground.position.y) < -50f ||
+        if (//(body.position.y - ground.position.y) < -50f ||
             Mathf.Abs(body.position.x - ground.position.x) > 40f ||
             Mathf.Abs(body.position.z - ground.position.z) > 40f)
         {
@@ -226,21 +227,21 @@ public class CrawlerAgent : Agent
     /// <summary>
     /// Reward moving towards target & Penalize moving away from target.
     /// </summary>
-    void RewardFunctionMovingTowards()
+    /*void RewardFunctionMovingTowards()
     {
-        movingTowardsDot = Vector3.Dot(jdController.bodyPartsDict[body].rb.velocity, dirToTarget.normalized);
+        //movingTowardsDot = Vector3.Dot(jdController.bodyPartsDict[body].rb.velocity, dirToTarget.normalized);
         AddReward(0.03f * movingTowardsDot);
-    }
+    }*/
 
     /// <summary>
     /// Reward facing target & Penalize facing away from target
     /// </summary>
-    void RewardFunctionFacingTarget()
+    /*void RewardFunctionFacingTarget()
     {
         facingDot = Vector3.Dot(dirToTarget.normalized, body.forward);
         AddReward(0.01f * facingDot);
     }
-
+*/
     /// <summary>
     /// Existential penalty for time-contrained tasks.
     /// </summary>
@@ -255,10 +256,10 @@ public class CrawlerAgent : Agent
     public override void AgentReset()
     {
         Debug.Log("cona");
-        if (dirToTarget != Vector3.zero)
+        /*if (dirToTarget != Vector3.zero)
         {
             transform.rotation = Quaternion.LookRotation(dirToTarget);
-        }
+        }*/
 
         foreach (var bodyPart in jdController.bodyPartsDict.Values)
         {
@@ -267,6 +268,6 @@ public class CrawlerAgent : Agent
 
         isNewDecisionStep = true;
         currentDecisionStep = 1;
-        //ground.rotation = new Quaternion(0f, 0f, 0f, 0f);
+        ground.rotation = new Quaternion(0f, 0f, 0f, 0f);
     }
 }

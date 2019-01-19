@@ -182,7 +182,7 @@ public class CrawlerAgent : Agent
             var bpDict = jdController.bodyPartsDict;
 
             int i = -1;
-            /*
+
             // Pick a new target joint rotation
             bpDict[leg0Upper].SetJointTargetRotation(vectorAction[++i], vectorAction[++i], 0);
             bpDict[leg1Upper].SetJointTargetRotation(vectorAction[++i], vectorAction[++i], 0);
@@ -192,7 +192,7 @@ public class CrawlerAgent : Agent
             bpDict[leg1Lower].SetJointTargetRotation(vectorAction[++i], 0, 0);
             bpDict[leg2Lower].SetJointTargetRotation(vectorAction[++i], 0, 0);
             bpDict[leg3Lower].SetJointTargetRotation(vectorAction[++i], 0, 0);
-            */
+
             // Update joint strength
             bpDict[leg0Upper].SetJointStrength(vectorAction[++i]);
             bpDict[leg1Upper].SetJointStrength(vectorAction[++i]);
@@ -204,7 +204,7 @@ public class CrawlerAgent : Agent
             bpDict[leg3Lower].SetJointStrength(vectorAction[++i]);
         }
 
-        /*if ((body.position.y - ground.position.y) < -50f ||
+        if ((body.position.y - ground.position.y) < -50f ||
             Mathf.Abs(body.position.x - ground.position.x) > 40f ||
             Mathf.Abs(body.position.z - ground.position.z) > 40f)
         {
@@ -214,7 +214,7 @@ public class CrawlerAgent : Agent
         else
         {
             SetReward(0.1f);
-        }*/
+        }
 
         if (rewardUseTimePenalty)
         {

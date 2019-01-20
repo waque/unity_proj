@@ -109,52 +109,21 @@ public class CrawlerAgent : Agent
 
         // Forward & up to help with orientation
         AddVectorObs(body.transform.position.y);
-        AddVectorObs(body.forward);
+		AddVectorObs(body.transform.position - ground.position);
+		AddVectorObs(ground.position - sphere.position);
+        //AddVectorObs(body.forward);
         AddVectorObs(body.up);
         foreach (var bodyPart in jdController.bodyPartsDict.Values)
         {
             CollectObservationBodyPart(bodyPart);
         }
-    }
-    /*
-    /// <summary>
-    /// Agent touched the target
-    /// </summary>
-    public void TouchedTarget()
-    {
-        AddReward(1f);
-        if (respawnTargetWhenTouched)
-        {
-            GetRandomTargetPos();
-        }
+
+		// Add information related to the platform's rotation.
+		AddVectorObs(ground.GetComponent<Rigidbody>().rotation);
     }
 
-    /// <summary>
-    /// Moves target to a random position within specified radius.
-    /// </summary>
-    public void GetRandomTargetPos()
-    {
-        Vector3 newTargetPos = Random.insideUnitSphere * targetSpawnRadius;
-        newTargetPos.y = 5;
-        target.position = newTargetPos + ground.position;
-    }
-    */
     public override void AgentAction(float[] vectorAction, string textAction)
     {
-        /*if (detectTargets)
-        {
-            foreach (var bodyPart in jdController.bodyPartsDict.Values)
-            {
-                if (bodyPart.targetContact && !IsDone() && bodyPart.targetContact.touchingTarget)
-                {
-                    TouchedTarget();
-                }
-            }
-        }*/
-
-        // Update pos to target
-        //dirToTarget = target.position - jdController.bodyPartsDict[body].rb.position;
-
         // If enabled the feet will light up green when the foot is grounded.
         // This is just a visualization and isn't necessary for function
         if (useFootGroundedVisualization)
@@ -221,24 +190,6 @@ public class CrawlerAgent : Agent
     }
 
     /// <summary>
-    /// Reward moving towards target & Penalize moving away from target.
-    /// </summary>
-    /*void RewardFunctionMovingTowards()
-    {
-        //movingTowardsDot = Vector3.Dot(jdController.bodyPartsDict[body].rb.velocity, dirToTarget.normalized);
-        AddReward(0.03f * movingTowardsDot);
-    }*/
-
-    /// <summary>
-    /// Reward facing target & Penalize facing away from target
-    /// </summary>
-    /*void RewardFunctionFacingTarget()
-    {
-        facingDot = Vector3.Dot(dirToTarget.normalized, body.forward);
-        AddReward(0.01f * facingDot);
-    }
-*/
-    /// <summary>
     /// Existential penalty for time-contrained tasks.
     /// </summary>
     void RewardFunctionTimePenalty()
@@ -251,11 +202,6 @@ public class CrawlerAgent : Agent
     /// </summary>
     public override void AgentReset()
     {
-        /*if (dirToTarget != Vector3.zero)
-        {
-            transform.rotation = Quaternion.LookRotation(dirToTarget);
-        }*/
-
         foreach (var bodyPart in jdController.bodyPartsDict.Values)
         {
             bodyPart.Reset(bodyPart);

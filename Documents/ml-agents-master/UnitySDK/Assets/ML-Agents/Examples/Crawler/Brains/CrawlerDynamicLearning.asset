@@ -3,7 +3,7 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Name: CrawlerDynamicLearning
   m_EditorClassIdentifier: 
   brainParameters:
-    vectorObservationSize: 129
+    vectorObservationSize: 126
     numStackedVectorObservations: 1
     vectorActionSize: 14000000
     cameraResolutions: []
@@ -38,4 +38,4 @@ MonoBehaviour:
     - 
     - 
     vectorActionSpaceType: 1
-  model: {fileID: 4900000, guid: 9482a8782450a4d87b20942c4523176b, type: 3}
+  model: {fileID: 4900000, guid: 99cf9a78f042b7a41a19d3dccae06ba4, type: 3}

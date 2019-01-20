@@ -20,10 +20,10 @@ namespace MLAgents
         /// </summary>
         void OnCollisionEnter(Collision col)
         {
-            if (col.transform.CompareTag(Target))
+            /*if (col.transform.CompareTag(Target))
             {
                 touchingTarget = true;
-            }
+            }*/
         }
 
         /// <summary>
@@ -31,10 +31,10 @@ namespace MLAgents
         /// </summary>
         void OnCollisionExit(Collision other)
         {
-            if (other.transform.CompareTag(Target))
+            /*if (other.transform.CompareTag(Target))
             {
                 touchingTarget = false;
-            }
+            }*/
         }
     }
 }

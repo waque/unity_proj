@@ -10,9 +10,7 @@ public class CrawlerAgent : Agent
     //public Transform target;
 
     public Transform ground;
-    //public bool detectTargets;
-    //public bool respawnTargetWhenTouched;
-    //public float targetSpawnRadius;
+	public Transform sphere;
 
     [Header("Body Parts")] [Space(10)] public Transform body;
     public Transform leg0Upper;
@@ -204,9 +202,7 @@ public class CrawlerAgent : Agent
             bpDict[leg3Lower].SetJointStrength(vectorAction[++i]);
         }
 
-        if ((body.position.y - ground.position.y) < -50f ||
-            Mathf.Abs(body.position.x - ground.position.x) > 40f ||
-            Mathf.Abs(body.position.z - ground.position.z) > 40f)
+		if (body.position.y < sphere.position.y)
         {
             Done();
             SetReward(-1f); 
@@ -255,7 +251,6 @@ public class CrawlerAgent : Agent
     /// </summary>
     public override void AgentReset()
     {
-        Debug.Log("cona");
         /*if (dirToTarget != Vector3.zero)
         {
             transform.rotation = Quaternion.LookRotation(dirToTarget);
@@ -268,6 +263,6 @@ public class CrawlerAgent : Agent
 
         isNewDecisionStep = true;
         currentDecisionStep = 1;
-        ground.rotation = new Quaternion(0f, 0f, 0f, 0f);
+		ground.GetComponent<GroundController>().Reset();
     }
 }

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Name: CrawlerDynamicLearning
   m_EditorClassIdentifier: 
   brainParameters:
-    vectorObservationSize: 130
+    vectorObservationSize: 146
     numStackedVectorObservations: 1
     vectorActionSize: 14000000
     cameraResolutions: []

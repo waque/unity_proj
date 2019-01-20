@@ -20,6 +20,9 @@ namespace MLAgents
         public bool touchingGround;
         private const string Ground = "ground"; // Tag of ground object.
 
+		[Header("Crawler Balance Specific")]
+		public Agent buddyAgent;
+
         /// <summary>
         /// Check for collision with ground, and optionally penalize agent.
         /// </summary>
@@ -36,6 +39,8 @@ namespace MLAgents
                 if (agentDoneOnGroundContact)
                 {
                     agent.Done();
+					if (buddyAgent)
+						buddyAgent.Done();
                 }
             }
         }

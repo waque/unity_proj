@@ -9,8 +9,11 @@ public class CrawlerAgent : Agent
     //[Header("Target To Walk Towards")] [Space(10)]
     //public Transform target;
 
+	[Header("External Elements")] [Space(10)]
     public Transform ground;
 	public Transform sphere;
+	public Transform buddyBody;
+	public Agent buddyAgent;
 
     [Header("Body Parts")] [Space(10)] public Transform body;
     public Transform leg0Upper;
@@ -111,7 +114,7 @@ public class CrawlerAgent : Agent
         AddVectorObs(body.transform.position.y);
 		AddVectorObs(body.transform.position - ground.position);
 		AddVectorObs(ground.position - sphere.position);
-        //AddVectorObs(body.forward);
+        AddVectorObs(body.forward);
         AddVectorObs(body.up);
         foreach (var bodyPart in jdController.bodyPartsDict.Values)
         {
@@ -120,6 +123,12 @@ public class CrawlerAgent : Agent
 
 		// Add information related to the platform's rotation.
 		AddVectorObs(ground.GetComponent<Rigidbody>().rotation);
+
+		// Add information of the buddy.
+		AddVectorObs(buddyBody.position.y);
+		AddVectorObs(buddyBody.position - ground.position);
+		AddVectorObs(buddyBody.forward);
+		AddVectorObs(buddyBody.up);
     }
 
     public override void AgentAction(float[] vectorAction, string textAction)
@@ -171,10 +180,14 @@ public class CrawlerAgent : Agent
             bpDict[leg3Lower].SetJointStrength(vectorAction[++i]);
         }
 
-		if (body.position.y < sphere.position.y)
+		if (!IsDone() &&
+			(body.position.y < sphere.position.y - 5.0f || 
+			ground.position.y < sphere.position.y - 5.0f))
         {
             Done();
-            SetReward(-1f); 
+			buddyAgent.Done();
+            SetReward(-1f);
+			buddyAgent.SetReward(-1f);
         }
         else
         {

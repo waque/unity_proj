@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Name: CrawlerBuddyLearning
   m_EditorClassIdentifier: 
   brainParameters:
-    vectorObservationSize: 146
+    vectorObservationSize: 152
     numStackedVectorObservations: 1
     vectorActionSize: 14000000
     cameraResolutions: []
@@ -38,4 +38,4 @@ MonoBehaviour:
     - 
     - 
     vectorActionSpaceType: 1
-  model: {fileID: 4900000, guid: 9096ceb8ee5c79f47a4616f2a49a3d75, type: 3}
+  model: {fileID: 4900000, guid: d58c4602982bb8d4daff418843fa6bbc, type: 3}

@@ -9,7 +9,9 @@ public class CrawlerAgent : Agent
     //[Header("Target To Walk Towards")] [Space(10)]
     //public Transform target;
 
-	[Header("External Elements")] [Space(10)]
+    public Transform target;
+
+    [Header("External Elements")] [Space(10)]
     public Transform ground;
 	public Transform sphere;
 	public Transform buddyBody;
@@ -29,6 +31,12 @@ public class CrawlerAgent : Agent
     //Vector3 dirToTarget;
     float movingTowardsDot;
     float facingDot;
+
+    Vector3 dirToTarget;
+
+    public bool detectTargets;
+    public bool respawnTargetWhenTouched;
+    public float targetSpawnRadius;
 
     [Header("Reward Functions To Use")] [Space(10)]
     //public bool rewardMovingTowardsTarget; // Agent should move towards target
@@ -108,7 +116,8 @@ public class CrawlerAgent : Agent
     {
         jdController.GetCurrentJointForces();
         // Normalize dir vector to help generalize
-        //AddVectorObs(dirToTarget.normalized);
+        AddVectorObs(dirToTarget.normalized);
+        AddVectorObs(target.position - ground.position);
 
         // Forward & up to help with orientation
         AddVectorObs(body.transform.position.y);
@@ -131,8 +140,39 @@ public class CrawlerAgent : Agent
 		AddVectorObs(buddyBody.up);
     }
 
+    public void TouchedTarget()
+    {
+        AddReward(1f);
+        if (respawnTargetWhenTouched)
+        {
+            GetRandomTargetPos();
+        }
+    }
+
+    public void GetRandomTargetPos()
+    {
+        Vector3 newTargetPos = Random.insideUnitSphere * targetSpawnRadius;
+        newTargetPos.y = 5;
+        target.position = newTargetPos + ground.position;
+    }
+
     public override void AgentAction(float[] vectorAction, string textAction)
     {
+
+        if (detectTargets)
+        {
+            foreach (var bodyPart in jdController.bodyPartsDict.Values)
+            {
+                if (bodyPart.targetContact && !IsDone() && bodyPart.targetContact.touchingTarget)
+                {
+                    TouchedTarget();
+                }
+            }
+        }
+
+        // Update pos to target
+        dirToTarget = target.position - jdController.bodyPartsDict[body].rb.position;
+
         // If enabled the feet will light up green when the foot is grounded.
         // This is just a visualization and isn't necessary for function
         if (useFootGroundedVisualization)
@@ -194,6 +234,11 @@ public class CrawlerAgent : Agent
             SetReward(0.1f);
         }
 
+        if(target.position.y < sphere.position.y - 5.0f){
+            AddReward(-0.1f);
+            GetRandomTargetPos();
+        }
+
         if (rewardUseTimePenalty)
         {
             RewardFunctionTimePenalty();
@@ -208,6 +253,25 @@ public class CrawlerAgent : Agent
     void RewardFunctionTimePenalty()
     {
         AddReward(-0.001f);
+    }
+
+    public float RewardFunctionMovingTowards()
+    {
+        movingTowardsDot = Vector3.Dot(jdController.bodyPartsDict[body].rb.velocity, dirToTarget.normalized);
+        return 0.03f * movingTowardsDot;
+    }
+
+    void RewardTeamWorkFunction()
+    {
+
+        float buddyReward = ((CrawlerAgent)buddyAgent).RewardFunctionMovingTowards();
+        float mainReward = this.RewardFunctionMovingTowards();
+        if (buddyReward > 0 && mainReward <= 0){
+            AddReward(0.1f);
+        }
+        if(mainReward > 0 && buddyReward <= 0){
+            AddReward(0.1f);
+        }
     }
 
     /// <summary>

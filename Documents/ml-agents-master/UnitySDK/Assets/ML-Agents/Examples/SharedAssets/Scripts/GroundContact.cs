@@ -33,7 +33,9 @@ namespace MLAgents
                 touchingGround = true;
                 if (penalizeGroundContact)
                 {
-                    agent.SetReward(groundContactPenalty);
+                    agent.AddReward(groundContactPenalty);
+					if (buddyAgent)
+						buddyAgent.AddReward(-groundContactPenalty);
                 }
 
                 if (agentDoneOnGroundContact)

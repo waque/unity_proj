@@ -43,6 +43,7 @@ public class CrawlerAgent : Agent
 
     //public bool rewardFacingTarget; // Agent should face the target
     public bool rewardUseTimePenalty; // Hurry up
+	public bool rewardUseTime; // Reward not dying
 
     [Header("Foot Grounded Visualization")] [Space(10)]
     public bool useFootGroundedVisualization;
@@ -131,7 +132,7 @@ public class CrawlerAgent : Agent
         }
 
 		// Add information related to the platform's rotation.
-		AddVectorObs(ground.GetComponent<Rigidbody>().rotation);
+		AddVectorObs(ground.rotation);
 
 		// Add information of the buddy.
 		AddVectorObs(buddyBody.position.y);
@@ -154,22 +155,15 @@ public class CrawlerAgent : Agent
         Vector3 newTargetPos = Random.insideUnitSphere * targetSpawnRadius;
         newTargetPos.y = 5;
         target.position = newTargetPos + ground.position;
+
+		target.rotation = Quaternion.identity;
+		Rigidbody rb = target.GetComponent<Rigidbody>();
+		rb.velocity = Vector3.zero;
+		rb.angularVelocity = Vector3.zero;
     }
 
     public override void AgentAction(float[] vectorAction, string textAction)
     {
-
-        if (detectTargets)
-        {
-            foreach (var bodyPart in jdController.bodyPartsDict.Values)
-            {
-                if (bodyPart.targetContact && !IsDone() && bodyPart.targetContact.touchingTarget)
-                {
-                    TouchedTarget();
-                }
-            }
-        }
-
         // Update pos to target
         dirToTarget = target.position - jdController.bodyPartsDict[body].rb.position;
 
@@ -220,58 +214,21 @@ public class CrawlerAgent : Agent
             bpDict[leg3Lower].SetJointStrength(vectorAction[++i]);
         }
 
-		if (!IsDone() &&
-			(body.position.y < sphere.position.y - 5.0f || 
-			ground.position.y < sphere.position.y - 5.0f))
+		if (body.position.y < sphere.position.y - 5.0f)
         {
             Done();
 			buddyAgent.Done();
-            SetReward(-1f);
-			buddyAgent.SetReward(-1f);
+            AddReward(-1f);
+			buddyAgent.AddReward(1f);
         }
         else
         {
-            SetReward(0.1f);
+			if (rewardUseTime)
+				AddReward(0.001f);
         }
-
-        if(target.position.y < sphere.position.y - 5.0f){
-            AddReward(-0.1f);
-            GetRandomTargetPos();
-        }
-
-        if (rewardUseTimePenalty)
-        {
-            RewardFunctionTimePenalty();
-        }
+			
 
         IncrementDecisionTimer();
-    }
-
-    /// <summary>
-    /// Existential penalty for time-contrained tasks.
-    /// </summary>
-    void RewardFunctionTimePenalty()
-    {
-        AddReward(-0.001f);
-    }
-
-    public float RewardFunctionMovingTowards()
-    {
-        movingTowardsDot = Vector3.Dot(jdController.bodyPartsDict[body].rb.velocity, dirToTarget.normalized);
-        return 0.03f * movingTowardsDot;
-    }
-
-    void RewardTeamWorkFunction()
-    {
-
-        float buddyReward = ((CrawlerAgent)buddyAgent).RewardFunctionMovingTowards();
-        float mainReward = this.RewardFunctionMovingTowards();
-        if (buddyReward > 0 && mainReward <= 0){
-            AddReward(0.1f);
-        }
-        if(mainReward > 0 && buddyReward <= 0){
-            AddReward(0.1f);
-        }
     }
 
     /// <summary>
@@ -287,5 +244,6 @@ public class CrawlerAgent : Agent
         isNewDecisionStep = true;
         currentDecisionStep = 1;
 		ground.GetComponent<GroundController>().Reset();
+		GetRandomTargetPos();
     }
 }

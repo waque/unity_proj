@@ -10,6 +10,7 @@ public class CrawlerAgent : Agent
     //public Transform target;
 
     public Transform target;
+    public Transform potion;
 
     [Header("External Elements")] [Space(10)]
     public Transform ground;
@@ -139,6 +140,12 @@ public class CrawlerAgent : Agent
 		AddVectorObs(buddyBody.position - ground.position);
 		AddVectorObs(buddyBody.forward);
 		AddVectorObs(buddyBody.up);
+    }
+
+    public void TouchedPotion()
+    {
+        AddReward(0.3f);
+        //TODO: increment strengh of agent
     }
 
     public void TouchedTarget()

@@ -11,6 +11,7 @@ public class CrawlerAgent : Agent
 
     public Transform target;
     public Transform potion;
+    public bool detectPotion;
 
     [Header("External Elements")] [Space(10)]
     public Transform ground;
@@ -29,15 +30,19 @@ public class CrawlerAgent : Agent
     public Transform leg3Lower;
 
     [Header("Joint Settings")] [Space(10)] JointDriveController jdController;
-    //Vector3 dirToTarget;
     float movingTowardsDot;
     float facingDot;
 
     Vector3 dirToTarget;
+    Vector3 dirToBuddy;
 
     public bool detectTargets;
     public bool respawnTargetWhenTouched;
     public float targetSpawnRadius;
+
+    public bool rewardMovingTowardsBuddy; // Agent should move towards the buddy
+
+    public bool rewardFacingBuddy; // Agent should face the buddy
 
     [Header("Reward Functions To Use")] [Space(10)]
     //public bool rewardMovingTowardsTarget; // Agent should move towards target
@@ -120,6 +125,7 @@ public class CrawlerAgent : Agent
         // Normalize dir vector to help generalize
         AddVectorObs(dirToTarget.normalized);
         AddVectorObs(target.position - ground.position);
+        AddVectorObs(dirToBuddy.normalized);
 
         // Forward & up to help with orientation
         AddVectorObs(body.transform.position.y);
@@ -142,18 +148,21 @@ public class CrawlerAgent : Agent
 		AddVectorObs(buddyBody.up);
     }
 
-    public void TouchedPotion()
-    {
-        AddReward(0.3f);
-        //TODO: increment strengh of agent
-    }
 
     public void TouchedTarget()
     {
-        AddReward(1f);
         if (respawnTargetWhenTouched)
         {
             GetRandomTargetPos();
+
+            AddReward(0.3f);
+            //TODO: increment strengh of agent
+            //this.transform.localScale = new Vector3(2, 2, 2);
+            foreach (var bodyPart in jdController.bodyPartsDict.Values)
+            {
+                //bodyPart.SetJointStrength(body.)
+                Debug.Log(bodyPart.currentStrength);
+            }
         }
     }
 
@@ -162,17 +171,25 @@ public class CrawlerAgent : Agent
         Vector3 newTargetPos = Random.insideUnitSphere * targetSpawnRadius;
         newTargetPos.y = 5;
         target.position = newTargetPos + ground.position;
-
-		target.rotation = Quaternion.identity;
-		Rigidbody rb = target.GetComponent<Rigidbody>();
-		rb.velocity = Vector3.zero;
-		rb.angularVelocity = Vector3.zero;
     }
 
     public override void AgentAction(float[] vectorAction, string textAction)
     {
+
+        if (detectTargets)
+        {
+            foreach (var bodyPart in jdController.bodyPartsDict.Values)
+            {
+                if (bodyPart.targetContact && !IsDone() && bodyPart.targetContact.touchingTarget)
+                {
+                    TouchedTarget();
+                }
+            }
+        }
+
         // Update pos to target
         dirToTarget = target.position - jdController.bodyPartsDict[body].rb.position;
+        dirToTarget = buddyAgent.transform.position - jdController.bodyPartsDict[body].rb.position;
 
         // If enabled the feet will light up green when the foot is grounded.
         // This is just a visualization and isn't necessary for function
@@ -233,9 +250,37 @@ public class CrawlerAgent : Agent
 			if (rewardUseTime)
 				AddReward(0.001f);
         }
-			
+        if (target.position.y < sphere.position.y - 5.0f)
+        {
+            AddReward(-0.1f);
+            GetRandomTargetPos();
+            IncrementDecisionTimer();
+        }
+        if (rewardMovingTowardsBuddy)
+        {
+            RewardFunctionMovingTowards();
+        }
 
-        IncrementDecisionTimer();
+        if (rewardFacingBuddy)
+        {
+            RewardFunctionFacingTarget();
+        }
+    }
+
+
+    void RewardFunctionMovingTowards()
+    {
+        movingTowardsDot = Vector3.Dot(jdController.bodyPartsDict[body].rb.velocity, dirToBuddy.normalized);
+        AddReward(0.03f * movingTowardsDot);
+    }
+
+    /// <summary>
+    /// Reward facing target & Penalize facing away from target
+    /// </summary>
+    void RewardFunctionFacingTarget()
+    {
+        facingDot = Vector3.Dot(dirToBuddy.normalized, body.forward);
+        AddReward(0.01f * facingDot);
     }
 
     /// <summary>
@@ -246,11 +291,13 @@ public class CrawlerAgent : Agent
         foreach (var bodyPart in jdController.bodyPartsDict.Values)
         {
             bodyPart.Reset(bodyPart);
+            bodyPart.currentStrength = 0;
+
         }
 
         isNewDecisionStep = true;
         currentDecisionStep = 1;
 		ground.GetComponent<GroundController>().Reset();
-		GetRandomTargetPos();
+		//GetRandomTargetPos();
     }
 }

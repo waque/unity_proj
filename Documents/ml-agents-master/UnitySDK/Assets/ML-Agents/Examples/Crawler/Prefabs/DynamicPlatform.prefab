@@ -4190,11 +4190,9 @@ MonoBehaviour:
   leg2Lower: {fileID: 4514806330078592}
   leg3Upper: {fileID: 4656870080762324}
   leg3Lower: {fileID: 4026659269828704}
-  detectTargets: 1
-  respawnTargetWhenTouched: 1
-  targetSpawnRadius: 10
-  rewardUseTimePenalty: 0
   rewardUseTime: 0
+  rewardFaceEnemy: 1
+  rewardAggressive: 1
   useFootGroundedVisualization: 0
   foot0: {fileID: 23583574125262266}
   foot1: {fileID: 23481904747803174}
@@ -4260,11 +4258,9 @@ MonoBehaviour:
   leg2Lower: {fileID: 4292029391235702}
   leg3Upper: {fileID: 4340373046732614}
   leg3Lower: {fileID: 4619296610602628}
-  detectTargets: 1
-  respawnTargetWhenTouched: 1
-  targetSpawnRadius: 13
-  rewardUseTimePenalty: 0
   rewardUseTime: 0
+  rewardFaceEnemy: 1
+  rewardAggressive: 1
   useFootGroundedVisualization: 0
   foot0: {fileID: 23145806749681820}
   foot1: {fileID: 23590143303594340}

@@ -45,8 +45,9 @@ public class CrawlerAgent : Agent
     //public bool rewardMovingTowardsTarget; // Agent should move towards target
 
     //public bool rewardFacingTarget; // Agent should face the target
-    public bool rewardUseTimePenalty; // Hurry up
 	public bool rewardUseTime; // Reward not dying
+	public bool rewardFaceEnemy;
+	public bool rewardAggressive;
 
     [Header("Foot Grounded Visualization")] [Space(10)]
     public bool useFootGroundedVisualization;
@@ -222,32 +223,28 @@ public class CrawlerAgent : Agent
             Done();
 			buddyAgent.Done();
 
-			// Punish for losing.
-            SetReward(-1f);
-
-			// Reward Buddy for not falling.
-			if (buddyBody.position.y > sphere.position.y)
-				buddyAgent.SetReward(1f);
-			else
-				buddyAgent.SetReward(-1f);
+			buddyAgent.AddReward(1.0f);
         }
         else
         {
-			if (rewardUseTime)
-				SetReward(0.01f);
-
-
-
-			Vector3 body_projection = new Vector3(body.position.x, 0, body.position.z);
-			Vector3 ground_projection = new Vector3(ground.position.x, 0, ground.position.z);
-			if ((body_projection - ground_projection).magnitude < bonusRadius) {
-				AddReward(0.5f);
-			}
+			if (rewardUseTime) AddReward(0.001f);
+			if (rewardFaceEnemy) RewardFaceEnemy();
+			if (rewardAggressive) RewardAggressive();
         }
 			
 
         IncrementDecisionTimer();
     }
+
+	void RewardFaceEnemy() {
+		Vector3 toBuddy = (buddyBody.position - body.position).normalized;
+		AddReward(0.01f * Vector3.Dot(body.forward, toBuddy));
+	}
+
+	void RewardAggressive() {
+		Vector3 toBuddy = (buddyBody.position - body.position).normalized;
+		AddReward(0.03f * Vector3.Dot(jdController.bodyPartsDict[body].rb.velocity, toBuddy));
+	}
 
     /// <summary>
     /// Loop over body parts and reset them to initial conditions.

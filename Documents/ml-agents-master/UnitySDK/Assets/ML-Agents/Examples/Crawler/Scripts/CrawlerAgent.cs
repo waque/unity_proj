@@ -11,6 +11,9 @@ public class CrawlerAgent : Agent
 
     public Transform target;
 
+	public float bonusRadius;
+	public bool randomizePositions;
+
     [Header("External Elements")] [Space(10)]
     public Transform ground;
 	public Transform sphere;
@@ -32,11 +35,11 @@ public class CrawlerAgent : Agent
     float movingTowardsDot;
     float facingDot;
 
-    Vector3 dirToTarget;
+    //Vector3 dirToTarget;
 
-    public bool detectTargets;
-    public bool respawnTargetWhenTouched;
-    public float targetSpawnRadius;
+    //public bool detectTargets;
+    //public bool respawnTargetWhenTouched;
+    //public float targetSpawnRadius;
 
     [Header("Reward Functions To Use")] [Space(10)]
     //public bool rewardMovingTowardsTarget; // Agent should move towards target
@@ -117,8 +120,8 @@ public class CrawlerAgent : Agent
     {
         jdController.GetCurrentJointForces();
         // Normalize dir vector to help generalize
-        AddVectorObs(dirToTarget.normalized);
-        AddVectorObs(target.position - ground.position);
+        //AddVectorObs(dirToTarget.normalized);
+        //AddVectorObs(target.position - ground.position);
 
         // Forward & up to help with orientation
         AddVectorObs(body.transform.position.y);
@@ -141,7 +144,7 @@ public class CrawlerAgent : Agent
 		AddVectorObs(buddyBody.up);
     }
 
-    public void TouchedTarget()
+    /*public void TouchedTarget()
     {
         AddReward(1f);
         if (respawnTargetWhenTouched)
@@ -160,12 +163,12 @@ public class CrawlerAgent : Agent
 		Rigidbody rb = target.GetComponent<Rigidbody>();
 		rb.velocity = Vector3.zero;
 		rb.angularVelocity = Vector3.zero;
-    }
+    }*/
 
     public override void AgentAction(float[] vectorAction, string textAction)
     {
         // Update pos to target
-        dirToTarget = target.position - jdController.bodyPartsDict[body].rb.position;
+        //dirToTarget = target.position - jdController.bodyPartsDict[body].rb.position;
 
         // If enabled the feet will light up green when the foot is grounded.
         // This is just a visualization and isn't necessary for function
@@ -214,17 +217,32 @@ public class CrawlerAgent : Agent
             bpDict[leg3Lower].SetJointStrength(vectorAction[++i]);
         }
 
-		if (body.position.y < sphere.position.y - 5.0f)
+		if (body.position.y < sphere.position.y - 150.0f)
         {
             Done();
 			buddyAgent.Done();
-            AddReward(-1f);
-			buddyAgent.AddReward(1f);
+
+			// Punish for losing.
+            SetReward(-1f);
+
+			// Reward Buddy for not falling.
+			if (buddyBody.position.y > sphere.position.y)
+				buddyAgent.SetReward(1f);
+			else
+				buddyAgent.SetReward(-1f);
         }
         else
         {
 			if (rewardUseTime)
-				AddReward(0.001f);
+				SetReward(0.01f);
+
+
+
+			Vector3 body_projection = new Vector3(body.position.x, 0, body.position.z);
+			Vector3 ground_projection = new Vector3(ground.position.x, 0, ground.position.z);
+			if ((body_projection - ground_projection).magnitude < bonusRadius) {
+				AddReward(0.5f);
+			}
         }
 			
 
@@ -244,6 +262,14 @@ public class CrawlerAgent : Agent
         isNewDecisionStep = true;
         currentDecisionStep = 1;
 		ground.GetComponent<GroundController>().Reset();
-		GetRandomTargetPos();
+		//GetRandomTargetPos();
+
+		if (randomizePositions) {
+			Vector3 pos = sphere.position + Random.insideUnitSphere * 5.0f;
+			pos.y = 4;
+
+			gameObject.transform.position = pos;
+			gameObject.transform.Rotate(new Vector3(0, Random.Range(0f, 360f), 0));
+		}
     }
 }

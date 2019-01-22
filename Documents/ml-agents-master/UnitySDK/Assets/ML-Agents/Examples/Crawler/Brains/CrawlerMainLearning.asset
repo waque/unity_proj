@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Name: CrawlerMainLearning
   m_EditorClassIdentifier: 
   brainParameters:
-    vectorObservationSize: 152
-    numStackedVectorObservations: 1
+    vectorObservationSize: 146
+    numStackedVectorObservations: 3
     vectorActionSize: 14000000
     cameraResolutions: []
     vectorActionDescriptions:

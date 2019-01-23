@@ -175,7 +175,7 @@ CrawlerMainLearning:
     batch_size: 2024
     buffer_size: 20240
     gamma: 0.995
-    max_steps: 1e5
+    max_steps: 1e6
     summary_freq: 3000
     num_layers: 3
     hidden_units: 512
@@ -187,7 +187,7 @@ CrawlerBuddyLearning:
     batch_size: 2024
     buffer_size: 20240
     gamma: 0.995
-    max_steps: 1e5
+    max_steps: 1e6
     summary_freq: 3000
     num_layers: 3
     hidden_units: 512

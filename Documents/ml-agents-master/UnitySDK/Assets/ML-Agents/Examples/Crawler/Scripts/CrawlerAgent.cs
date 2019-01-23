@@ -61,6 +61,9 @@ public class CrawlerAgent : Agent
     bool isNewDecisionStep;
     int currentDecisionStep;
 
+	[HideInInspector]
+	public Vector3 initialPosition;
+
     public override void InitializeAgent()
     {
         jdController = GetComponent<JointDriveController>();
@@ -76,6 +79,8 @@ public class CrawlerAgent : Agent
         jdController.SetupBodyPart(leg2Lower);
         jdController.SetupBodyPart(leg3Upper);
         jdController.SetupBodyPart(leg3Lower);
+
+		initialPosition = body.position;
     }
 
     /// <summary>
@@ -218,12 +223,13 @@ public class CrawlerAgent : Agent
             bpDict[leg3Lower].SetJointStrength(vectorAction[++i]);
         }
 
-		if (body.position.y < sphere.position.y - 150.0f)
+		if (body.position.y < sphere.position.y - 50.0f)
         {
             Done();
 			buddyAgent.Done();
 
-			buddyAgent.AddReward(1.0f);
+			AddReward(-1.0f);
+			//buddyAgent.AddReward(1.0f);
         }
         else
         {
@@ -238,12 +244,12 @@ public class CrawlerAgent : Agent
 
 	void RewardFaceEnemy() {
 		Vector3 toBuddy = (buddyBody.position - body.position).normalized;
-		AddReward(0.01f * Vector3.Dot(body.forward, toBuddy));
+		AddReward(0.001f * Vector3.Dot(body.forward, toBuddy));
 	}
 
 	void RewardAggressive() {
 		Vector3 toBuddy = (buddyBody.position - body.position).normalized;
-		AddReward(0.03f * Vector3.Dot(jdController.bodyPartsDict[body].rb.velocity, toBuddy));
+		AddReward(0.003f * Vector3.Dot(jdController.bodyPartsDict[body].rb.velocity, toBuddy));
 	}
 
     /// <summary>
@@ -262,11 +268,14 @@ public class CrawlerAgent : Agent
 		//GetRandomTargetPos();
 
 		if (randomizePositions) {
-			Vector3 pos = sphere.position + Random.insideUnitSphere * 5.0f;
+			Vector3 pos = initialPosition + Random.insideUnitSphere * 3.0f;
 			pos.y = 4;
 
 			gameObject.transform.position = pos;
-			gameObject.transform.Rotate(new Vector3(0, Random.Range(0f, 360f), 0));
+
+			Vector3 lookAt = sphere.position;
+			lookAt.y = pos.y;
+			gameObject.transform.rotation = Quaternion.LookRotation(lookAt, Vector3.up);
 		}
     }
 }

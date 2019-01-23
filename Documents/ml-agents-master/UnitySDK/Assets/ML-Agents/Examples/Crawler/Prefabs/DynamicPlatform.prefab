@@ -1008,7 +1008,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1981591077641804}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.5, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4302802469050776}
@@ -4167,7 +4167,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f37c30a5e8d04117947188818902ef3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  brain: {fileID: 11400000, guid: 170ce9e0a6551ae44904032c8b2e4f43, type: 2}
+  brain: {fileID: 11400000, guid: db96fef8a7f265244b60a3a507ba0cc2, type: 2}
   agentParameters:
     agentCameras: []
     maxStep: 5000
@@ -4176,7 +4176,7 @@ MonoBehaviour:
     numberOfActionsBetweenDecisions: 5
   target: {fileID: 4595811813443638}
   bonusRadius: 1
-  randomizePositions: 0
+  randomizePositions: 1
   ground: {fileID: 4684408634944056}
   sphere: {fileID: 4670135628852864}
   buddyBody: {fileID: 4930612494833344}
@@ -4200,6 +4200,7 @@ MonoBehaviour:
   foot3: {fileID: 23542421072827534}
   groundedMaterial: {fileID: 2100000, guid: 624b24bbec31f44babfb57ef2dfbc537, type: 2}
   unGroundedMaterial: {fileID: 2100000, guid: d633725e980bb4ac5b0dd309bad3702f, type: 2}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &114283464447001334
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -4244,7 +4245,7 @@ MonoBehaviour:
     numberOfActionsBetweenDecisions: 5
   target: {fileID: 4595811813443638}
   bonusRadius: 1
-  randomizePositions: 0
+  randomizePositions: 1
   ground: {fileID: 4684408634944056}
   sphere: {fileID: 4670135628852864}
   buddyBody: {fileID: 4222914027048448}
@@ -4268,6 +4269,7 @@ MonoBehaviour:
   foot3: {fileID: 23919823809338350}
   groundedMaterial: {fileID: 2100000, guid: 624b24bbec31f44babfb57ef2dfbc537, type: 2}
   unGroundedMaterial: {fileID: 2100000, guid: d633725e980bb4ac5b0dd309bad3702f, type: 2}
+  initialPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &114345890741010956
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -6,12 +6,6 @@ using MLAgents;
 [RequireComponent(typeof(JointDriveController))] // Required to set joint forces
 public class CrawlerAgent : Agent
 {
-    //[Header("Target To Walk Towards")] [Space(10)]
-    //public Transform target;
-
-    public Transform target;
-
-	public float bonusRadius;
 	public bool randomizePositions;
 
     [Header("External Elements")] [Space(10)]
@@ -31,20 +25,10 @@ public class CrawlerAgent : Agent
     public Transform leg3Lower;
 
     [Header("Joint Settings")] [Space(10)] JointDriveController jdController;
-    //Vector3 dirToTarget;
     float movingTowardsDot;
     float facingDot;
 
-    //Vector3 dirToTarget;
-
-    //public bool detectTargets;
-    //public bool respawnTargetWhenTouched;
-    //public float targetSpawnRadius;
-
     [Header("Reward Functions To Use")] [Space(10)]
-    //public bool rewardMovingTowardsTarget; // Agent should move towards target
-
-    //public bool rewardFacingTarget; // Agent should face the target
 	public bool rewardUseTime; // Reward not dying
 	public bool rewardFaceEnemy;
 	public bool rewardAggressive;
@@ -125,9 +109,6 @@ public class CrawlerAgent : Agent
     public override void CollectObservations()
     {
         jdController.GetCurrentJointForces();
-        // Normalize dir vector to help generalize
-        //AddVectorObs(dirToTarget.normalized);
-        //AddVectorObs(target.position - ground.position);
 
         // Forward & up to help with orientation
         AddVectorObs(body.transform.position.y);
@@ -135,6 +116,7 @@ public class CrawlerAgent : Agent
 		AddVectorObs(ground.position - sphere.position);
         AddVectorObs(body.forward);
         AddVectorObs(body.up);
+
         foreach (var bodyPart in jdController.bodyPartsDict.Values)
         {
             CollectObservationBodyPart(bodyPart);
@@ -150,32 +132,8 @@ public class CrawlerAgent : Agent
 		AddVectorObs(buddyBody.up);
     }
 
-    /*public void TouchedTarget()
-    {
-        AddReward(1f);
-        if (respawnTargetWhenTouched)
-        {
-            GetRandomTargetPos();
-        }
-    }
-
-    public void GetRandomTargetPos()
-    {
-        Vector3 newTargetPos = Random.insideUnitSphere * targetSpawnRadius;
-        newTargetPos.y = 5;
-        target.position = newTargetPos + ground.position;
-
-		target.rotation = Quaternion.identity;
-		Rigidbody rb = target.GetComponent<Rigidbody>();
-		rb.velocity = Vector3.zero;
-		rb.angularVelocity = Vector3.zero;
-    }*/
-
     public override void AgentAction(float[] vectorAction, string textAction)
     {
-        // Update pos to target
-        //dirToTarget = target.position - jdController.bodyPartsDict[body].rb.position;
-
         // If enabled the feet will light up green when the foot is grounded.
         // This is just a visualization and isn't necessary for function
         if (useFootGroundedVisualization)
@@ -229,7 +187,6 @@ public class CrawlerAgent : Agent
 			buddyAgent.Done();
 
 			AddReward(-1.0f);
-			//buddyAgent.AddReward(1.0f);
         }
         else
         {

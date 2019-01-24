@@ -5,10 +5,17 @@ using MLAgents;
 
 public class WalkerAgent : Agent
 {
-    [Header("Specific to Walker")] [Header("Target To Walk Towards")] [Space(10)]
-    public Transform target;
+    [Header("Specific to Walker")] [Header("Buddy")] [Space(10)]
+	public WalkerAgent buddy;
+	public Transform ground;
+	public Transform sphere;
 
-    Vector3 dirToTarget;
+	[Header("Rewards to Use")]
+	public bool rewardUseTime;
+	public bool rewardAggressive;
+	public bool rewardFaceEnemy;
+
+	[Header("Body Parts")]
     public Transform hips;
     public Transform chest;
     public Transform spine;
@@ -53,17 +60,17 @@ public class WalkerAgent : Agent
     /// <summary>
     /// Add relevant information on each body part to observations.
     /// </summary>
-    public void CollectObservationBodyPart(BodyPart bp)
+	public void CollectObservationBodyPart(BodyPart bp, WalkerAgent a)
     {
         var rb = bp.rb;
         AddVectorObs(bp.groundContact.touchingGround ? 1 : 0); // Is this bp touching the ground
         AddVectorObs(rb.velocity);
         AddVectorObs(rb.angularVelocity);
-        Vector3 localPosRelToHips = hips.InverseTransformPoint(rb.position);
+        Vector3 localPosRelToHips = a.hips.InverseTransformPoint(rb.position);
         AddVectorObs(localPosRelToHips);
 
-        if (bp.rb.transform != hips && bp.rb.transform != handL && bp.rb.transform != handR &&
-            bp.rb.transform != footL && bp.rb.transform != footR && bp.rb.transform != head)
+        if (bp.rb.transform != a.hips && bp.rb.transform != a.handL && bp.rb.transform != a.handR &&
+            bp.rb.transform != a.footL && bp.rb.transform != a.footR && bp.rb.transform != a.head)
         {
             AddVectorObs(bp.currentXNormalizedRot);
             AddVectorObs(bp.currentYNormalizedRot);
@@ -79,21 +86,34 @@ public class WalkerAgent : Agent
     {
         jdController.GetCurrentJointForces();
 
-        AddVectorObs(dirToTarget.normalized);
         AddVectorObs(jdController.bodyPartsDict[hips].rb.position);
         AddVectorObs(hips.forward);
         AddVectorObs(hips.up);
+		AddVectorObs(hips.position - ground.position);
+
+		AddVectorObs(ground.position - sphere.position);
+		AddVectorObs(ground.up);
+		AddVectorObs(ground.rotation);
 
         foreach (var bodyPart in jdController.bodyPartsDict.Values)
         {
-            CollectObservationBodyPart(bodyPart);
+            CollectObservationBodyPart(bodyPart, this);
         }
+
+		// Collect info on buddy.
+		AddVectorObs(buddy.jdController.bodyPartsDict[buddy.hips].rb.position);
+		AddVectorObs(buddy.hips.forward);
+		AddVectorObs(buddy.hips.up);
+		AddVectorObs(buddy.hips.position - ground.position);
+
+		foreach (var bodyPart in buddy.jdController.bodyPartsDict.Values)
+		{
+			CollectObservationBodyPart(bodyPart, buddy);
+		}
     }
 
     public override void AgentAction(float[] vectorAction, string textAction)
     {
-        dirToTarget = target.position - jdController.bodyPartsDict[hips].rb.position;
-
         // Apply action to all relevant body parts. 
         if (isNewDecisionStep)
         {
@@ -135,19 +155,30 @@ public class WalkerAgent : Agent
 
         IncrementDecisionTimer();
 
-        // Set reward for this step according to mixture of the following elements.
-        // a. Velocity alignment with goal direction.
-        // b. Rotation alignment with goal direction.
-        // c. Encourage head height.
-        // d. Discourage head movement.
-        AddReward(
-            +0.03f * Vector3.Dot(dirToTarget.normalized, jdController.bodyPartsDict[hips].rb.velocity)
-            + 0.01f * Vector3.Dot(dirToTarget.normalized, hips.forward)
-            + 0.02f * (head.position.y - hips.position.y)
-            - 0.01f * Vector3.Distance(jdController.bodyPartsDict[head].rb.velocity,
-                jdController.bodyPartsDict[hips].rb.velocity)
-        );
+		if (hips.position.y < sphere.position.y - 50.0f)
+		{
+			Done();
+			buddy.Done();
+
+			AddReward(-1.0f);
+		}
+		else
+		{
+			if (rewardUseTime) AddReward(0.001f);
+			if (rewardFaceEnemy) RewardFaceEnemy();
+			if (rewardAggressive) RewardAggressive();
+		}
     }
+
+	void RewardFaceEnemy() {
+		Vector3 toBuddy = (buddy.head.position - head.position).normalized;
+		AddReward(0.001f * Vector3.Dot(head.forward, toBuddy));
+	}
+
+	void RewardAggressive() {
+		Vector3 toBuddy = (buddy.chest.position - chest.position).normalized;
+		AddReward(0.003f * Vector3.Dot(jdController.bodyPartsDict[chest].rb.velocity, toBuddy));
+	}
 
     /// <summary>
     /// Only change the joint settings based on decision frequency.
@@ -172,11 +203,6 @@ public class WalkerAgent : Agent
     /// </summary>
     public override void AgentReset()
     {
-        if (dirToTarget != Vector3.zero)
-        {
-            transform.rotation = Quaternion.LookRotation(dirToTarget);
-        }
-
         foreach (var bodyPart in jdController.bodyPartsDict.Values)
         {
             bodyPart.Reset(bodyPart);
@@ -184,5 +210,6 @@ public class WalkerAgent : Agent
 
         isNewDecisionStep = true;
         currentDecisionStep = 1;
+		ground.GetComponent<GroundController>().Reset();
     }
 }

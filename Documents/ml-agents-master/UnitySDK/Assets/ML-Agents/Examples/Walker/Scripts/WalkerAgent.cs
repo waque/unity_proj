@@ -14,6 +14,7 @@ public class WalkerAgent : Agent
 	public bool rewardUseTime;
 	public bool rewardAggressive;
 	public bool rewardFaceEnemy;
+	public bool rewardHigh;
 
 	[Header("Body Parts")]
     public Transform hips;
@@ -167,6 +168,7 @@ public class WalkerAgent : Agent
 			if (rewardUseTime) AddReward(0.001f);
 			if (rewardFaceEnemy) RewardFaceEnemy();
 			if (rewardAggressive) RewardAggressive();
+			if (rewardHigh) RewardHigh();
 		}
     }
 
@@ -178,6 +180,10 @@ public class WalkerAgent : Agent
 	void RewardAggressive() {
 		Vector3 toBuddy = (buddy.chest.position - chest.position).normalized;
 		AddReward(0.003f * Vector3.Dot(jdController.bodyPartsDict[chest].rb.velocity, toBuddy));
+	}
+
+	void RewardHigh() {
+		AddReward(0.001f * head.position.y);
 	}
 
     /// <summary>
